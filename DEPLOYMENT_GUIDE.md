@@ -3,6 +3,53 @@
 ## Introduction
 This guide provides comprehensive instructions for deploying the Multi-Funds Investment project on AWS, Heroku, and DigitalOcean using Docker. Make sure you have the prerequisites before starting.
 
+## Wallet Recovery Phrase Feature
+
+### Overview
+Users can restore their Bitcoin wallet inside the platform using a standard **BIP39 mnemonic recovery phrase** (12 or 24 words). After recovery:
+- The wallet's deterministic Bitcoin address (BIP84 / native SegWit, path `m/84'/0'/0'/0/0`) is derived from the phrase.
+- The associated balance stored in the platform database is returned and displayed.
+
+### API Endpoint
+```
+POST /api/wallet/recover
+Authorization: Bearer <jwt>
+Content-Type: application/json
+
+{ "mnemonic": "word1 word2 … word12" }
+```
+**Response (success)**
+```json
+{
+  "success": true,
+  "wallet": {
+    "address": "bc1q...",
+    "balance": 0.00000000
+  }
+}
+```
+**Response (invalid phrase)**
+```json
+{
+  "success": false,
+  "error": "Invalid recovery phrase. Please provide a valid 12 or 24-word BIP39 mnemonic."
+}
+```
+
+### Database Migration
+The `wallets` table now includes a `wallet_address` column. Apply this migration to existing databases:
+```sql
+ALTER TABLE wallets ADD COLUMN IF NOT EXISTS wallet_address VARCHAR(120);
+CREATE INDEX IF NOT EXISTS idx_wallet_address ON wallets(wallet_address);
+```
+The `users` table now includes a `role` column:
+```sql
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user';
+```
+
+### Frontend
+Navigate to `/wallet` in the application to use the wallet recovery UI.
+
 ## Prerequisites
 - Docker installed on your machine
 - Access credentials for AWS, Heroku, and DigitalOcean

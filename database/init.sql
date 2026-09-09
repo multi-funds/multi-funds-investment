@@ -4,6 +4,7 @@ CREATE TABLE users (
     username VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -12,6 +13,7 @@ CREATE TABLE users (
 CREATE TABLE wallets (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    wallet_address VARCHAR(120),
     balance DECIMAL(10, 2) DEFAULT 0.0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -72,3 +74,4 @@ CREATE INDEX idx_transaction_wallet_id ON transactions(wallet_id);
 CREATE INDEX idx_kyc_user_id ON kyc_documents(user_id);
 CREATE INDEX idx_audit_user_id ON audit_logs(user_id);
 CREATE INDEX idx_session_user_id ON sessions(user_id);
+CREATE INDEX idx_wallet_address ON wallets(wallet_address);
